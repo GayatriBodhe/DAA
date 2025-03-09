@@ -1,131 +1,82 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <limits.h>
+#include <stdbool.h>
 
-// Function to add two matrices
-void addMatrix(int n, int A[n][n], int B[n][n], int result[n][n]) {
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            result[i][j] = A[i][j] + B[i][j];
+// Number of vertices in the graph
+#define MAX 100
+
+// Function to find the vertex with the minimum key value
+int minKey(int key[], bool mstSet[], int V) {
+    int min = INT_MAX, minIndex;
+
+    for (int v = 0; v < V; v++) {
+        if (!mstSet[v] && key[v] < min) {
+            min = key[v];
+            minIndex = v;
+        }
+    }
+    return minIndex;
 }
 
-// Function to subtract two matrices
-void subtractMatrix(int n, int A[n][n], int B[n][n], int result[n][n]) {
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            result[i][j] = A[i][j] - B[i][j];
+// Function to print the Minimum Spanning Tree (MST)
+void printMST(int parent[], int graph[MAX][MAX], int V) {
+    int minCost = 0;
+    printf("Edges in Minimum Cost Spanning Tree:\n");
+    for (int i = 1; i < V; i++) {
+        printf("%d -- %d == %d\n", parent[i], i, graph[i][parent[i]]);
+        minCost += graph[i][parent[i]];
+    }
+    printf("Minimum Cost: %d\n", minCost);
 }
 
-// Strassen's multiplication algorithm
-void strassen(int n, int A[n][n], int B[n][n], int C[n][n]) {
-    if (n == 1) {
-        C[0][0] = A[0][0] * B[0][0]; // Base case
-        return;
+// Function to implement Prim's Algorithm
+void primMST(int graph[MAX][MAX], int V) {
+    int parent[MAX]; // Array to store the constructed MST
+    int key[MAX];    // Key values to pick minimum weight edge
+    bool mstSet[MAX]; // To represent included vertices
+
+    // Initialize all keys as infinite and MST set as false
+    for (int i = 0; i < V; i++) {
+        key[i] = INT_MAX;
+        mstSet[i] = false;
     }
 
-    int newSize = n / 2;
-    int A11[newSize][newSize], A12[newSize][newSize], A21[newSize][newSize], A22[newSize][newSize];
-    int B11[newSize][newSize], B12[newSize][newSize], B21[newSize][newSize], B22[newSize][newSize];
-    int C11[newSize][newSize], C12[newSize][newSize], C21[newSize][newSize], C22[newSize][newSize];
-    int M1[newSize][newSize], M2[newSize][newSize], M3[newSize][newSize], M4[newSize][newSize], M5[newSize][newSize], M6[newSize][newSize], M7[newSize][newSize];
-    int temp1[newSize][newSize], temp2[newSize][newSize];
+    // Start from the first vertex
+    key[0] = 0;
+    parent[0] = -1; // Root of MST
 
-    // Dividing matrices into 4 sub-matrices
-    for (int i = 0; i < newSize; i++) {
-        for (int j = 0; j < newSize; j++) {
-            A11[i][j] = A[i][j];
-            A12[i][j] = A[i][j + newSize];
-            A21[i][j] = A[i + newSize][j];
-            A22[i][j] = A[i + newSize][j + newSize];
+    for (int count = 0; count < V - 1; count++) {
+        int u = minKey(key, mstSet, V);
+        mstSet[u] = true;
 
-            B11[i][j] = B[i][j];
-            B12[i][j] = B[i][j + newSize];
-            B21[i][j] = B[i + newSize][j];
-            B22[i][j] = B[i + newSize][j + newSize];
+        // Update key values of adjacent vertices
+        for (int v = 0; v < V; v++) {
+            if (graph[u][v] && !mstSet[v] && graph[u][v] < key[v]) {
+                parent[v] = u;
+                key[v] = graph[u][v];
+            }
         }
     }
 
-    // Calculating M1 to M7 using Strassen's formulas
-    addMatrix(newSize, A11, A22, temp1);
-    addMatrix(newSize, B11, B22, temp2);
-    strassen(newSize, temp1, temp2, M1); // M1 = (A11 + A22) * (B11 + B22)
-
-    addMatrix(newSize, A21, A22, temp1);
-    strassen(newSize, temp1, B11, M2); // M2 = (A21 + A22) * B11
-
-    subtractMatrix(newSize, B12, B22, temp1);
-    strassen(newSize, A11, temp1, M3); // M3 = A11 * (B12 - B22)
-
-    subtractMatrix(newSize, B21, B11, temp1);
-    strassen(newSize, A22, temp1, M4); // M4 = A22 * (B21 - B11)
-
-    addMatrix(newSize, A11, A12, temp1);
-    strassen(newSize, temp1, B22, M5); // M5 = (A11 + A12) * B22
-
-    subtractMatrix(newSize, A21, A11, temp1);
-    addMatrix(newSize, B11, B12, temp2);
-    strassen(newSize, temp1, temp2, M6); // M6 = (A21 - A11) * (B11 + B12)
-
-    subtractMatrix(newSize, A12, A22, temp1);
-    addMatrix(newSize, B21, B22, temp2);
-    strassen(newSize, temp1, temp2, M7); // M7 = (A12 - A22) * (B21 + B22)
-
-    // Computing C matrices
-    addMatrix(newSize, M1, M4, temp1);
-    subtractMatrix(newSize, temp1, M5, temp2);
-    addMatrix(newSize, temp2, M7, C11); // C11 = M1 + M4 - M5 + M7
-
-    addMatrix(newSize, M3, M5, C12); // C12 = M3 + M5
-
-    addMatrix(newSize, M2, M4, C21); // C21 = M2 + M4
-
-    addMatrix(newSize, M1, M3, temp1);
-    subtractMatrix(newSize, temp1, M2, temp2);
-    addMatrix(newSize, temp2, M6, C22); // C22 = M1 + M3 - M2 + M6
-
-    // Merging C11, C12, C21, and C22 into result matrix C
-    for (int i = 0; i < newSize; i++) {
-        for (int j = 0; j < newSize; j++) {
-            C[i][j] = C11[i][j];
-            C[i][j + newSize] = C12[i][j];
-            C[i + newSize][j] = C21[i][j];
-            C[i + newSize][j + newSize] = C22[i][j];
-        }
-    }
+    // Print the constructed MST
+    printMST(parent, graph, V);
 }
 
-// Function to print a matrix
-void printMatrix(int n, int matrix[n][n]) {
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++)
-            printf("%d ", matrix[i][j]);
-        printf("\n");
-    }
-}
-
-// Main function
+// Driver function
 int main() {
-    int n;
+    int V;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &V);
 
-    printf("Enter the size of the matrix (must be power of 2): ");
-    scanf("%d", &n);
+    int graph[MAX][MAX];
+    printf("Enter the adjacency matrix (use 0 for no connection):\n");
+    for (int i = 0; i < V; i++) {
+        for (int j = 0; j < V; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
 
-    int A[n][n], B[n][n], C[n][n];
-
-    printf("Enter elements of matrix A:\n");
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            scanf("%d", &A[i][j]);
-
-    printf("Enter elements of matrix B:\n");
-    for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-            scanf("%d", &B[i][j]);
-
-    // Applying Strassen's multiplication
-    strassen(n, A, B, C);
-
-    printf("Resultant Matrix C after Strassen's Multiplication:\n");
-    printMatrix(n, C);
+    primMST(graph, V);
 
     return 0;
 }
