@@ -1,4 +1,3 @@
-// C program to find the length of Longest Common Subsequence (LCS) of two strings
 //4. Find LCS for input sequences “AGGTAB” and “GXTXAYB”
 #include <stdio.h>
 #include <string.h>
