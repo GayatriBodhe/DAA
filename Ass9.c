@@ -1,3 +1,4 @@
+// C program to find the minimum cost of an Optimal Binary Search Tree (OBST)
 #include <stdio.h>
 #include <limits.h>
 
