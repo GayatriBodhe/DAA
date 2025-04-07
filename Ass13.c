@@ -1,3 +1,4 @@
+// This program implements Depth First Search (DFS) and Breadth First Search (BFS)
 #include <stdio.h>
 #include <stdlib.h>
 

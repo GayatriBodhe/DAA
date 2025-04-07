@@ -1,3 +1,4 @@
+// Subset Sum Problem
 #include <stdio.h>
 
 #define MAX 10

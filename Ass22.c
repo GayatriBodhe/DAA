@@ -17,6 +17,7 @@ void findLCS(char *X, char *Y, int m, int n) {
         }
     }
 
+    
     // Length of LCS
     int index = L[m][n];
     char lcs[index + 1];

@@ -1,3 +1,4 @@
+// This program finds the length of the longest common subsequence (LCS) of two strings using dynamic programming.
 #include <stdio.h>
 #include <string.h>
 
